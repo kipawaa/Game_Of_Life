@@ -3,7 +3,7 @@
 #include<stdlib.h>
 #include<unistd.h>
 #include<time.h>
-
+#include<graphics.h>
 
 // CONSTANTS
 #define map_width 234

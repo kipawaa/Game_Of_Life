@@ -87,4 +87,5 @@ int main() {
 	ret = clEnqueueReadBuffer(queue, map_obj, CL_TRUE, 0, width * height * sizeof(int), cellMap, 0, NULL, NULL);
 
 	// clean up everything associated with OCL
+
 }

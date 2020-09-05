@@ -14,6 +14,7 @@ __kernel void computeLifeValues(__global int* cellMap, __global int* height, __g
 	// (idx / width == height)			true if the COI is at the bottom edge of the map
 	
 	// determine which cells around it are applicable and alive
+	// TODO one of these isn't indexing properly, must be fixed
 	surroundingLifeCount += !(*(cellMap + idx) % *(width) == 0) * // conditional for left side (ensures there is a cell to the left)
 				(*(cellMap + idx - 1)); // value of the cell to the left
 	surroundingLifeCount += !(*(cellMap + idx) % *(width) == *(width) - 1) * // conditional for the right side

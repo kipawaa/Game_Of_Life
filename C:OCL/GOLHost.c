@@ -31,9 +31,8 @@ int main() {
 
 	// randomize the values in the map in range (0, 1)
 	for (int i = 0; i < width * height; i++) {
-		cellMap[i] = rand() % 2; // rand returns large integers, adding "% 2" envenly distributes 1s and 0s
+		cellMap[i] = rand() % 2; // rand returns large integers, adding "% 2" distributes 1s and 0s
 	}
-	printArr(cellMap, width, height);
 
 	// maximum size of the OCL file to be used
 	const size_t clFileSize = 0x100000;
@@ -105,10 +104,7 @@ int main() {
 
 	// compile the program
 	ret = clBuildProgram(program, 1, &device, NULL, NULL, NULL);
-	if (ret) {
-		printf("build: %d\n", ret);
-		return ret;
-	}
+
 	// print build errors if they occurred (this is larger than other error catches since it prints the compiling errors for the kernel)
 	if (ret) {
 		size_t logSize;
@@ -117,6 +113,8 @@ int main() {
 		char* log = (char*)malloc(logSize);
 		clGetProgramBuildInfo(program, device, CL_PROGRAM_BUILD_LOG, logSize, log, NULL);
 		printf("%s\n", log);
+		
+		return ret;
 	}
 
 	// create the kernel
@@ -156,6 +154,7 @@ int main() {
 		ret = clEnqueueReadBuffer(queue, map_obj, CL_TRUE, 0, width * height * sizeof(int), cellMap, 0, NULL, NULL);
 
 		printArr(cellMap, width, height);
+		sleep(1);
 	}
 
 	// clean up everything associated with OCL

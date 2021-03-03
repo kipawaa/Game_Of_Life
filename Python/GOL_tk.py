@@ -1,69 +1,82 @@
 from random import randint
 import tkinter as tk
+from time import sleep
 
-class Cell:
-	def __init__(self, x, y, width, height, life):
-		self.x = x
-		self.y = y
-		self.width = width
-		self.height = height
-		self.life = life
-	
-	def updateLife(self, cellMap):
-		lifeCount = 0
-		for i in range(-1, 1):
-			for j in range(-1, 1):
-				if (0 <= self.x + i and self.x + i < len(cellMap[0]) and 0 <= self.y + j and self.y + j < len(cellMap)):
-					lifeCount += cellMap[self.x + i][self.y + j].life
-		
-		lifeCount -= self.life
-		
-		if lifeCount < 3:
-			self.life = 0
-		elif lifeCount == 3:
-			self.life = 1
-		elif lifeCount > 4:
-			self.life = 0
-	
-	def draw(self, canvas):
-		canvas.create_rectangle(self.x, self.y, self.x + self.width, self.y + self.height, fill="white")
+def seed(mapWidth, mapHeight, cellWidth, cellHeight):
+    """ returns a new cellMap randomly populated with cells """
+    # create a new map
+    cellMap = []
 
-def startMap(mapWidth, mapHeight, cellWidth, cellHeight):
-	cellMap = []
-	for y in range(mapHeight // cellHeight):
-		row = []
-		for x in range(mapWidth // cellWidth):
-			row.append(Cell(x * cellWidth, y * cellHeight, cellWidth, cellHeight, randint(0, 1)))
-		cellMap.append(row)
-	return cellMap
+    # populate it randomly with live and dead cells (noisy start)
+    for y in range(mapHeight):
+        row = []
+        for x in range(mapWidth):
+            row.append(randint(0, 1))
+        cellMap.append(row)
 
-def step(cellMap):
-	for row in cellMap:
-		for cell in row:
-			cell.updateLife(cellMap);
+    # return the map
+    return cellMap
 
-def drawCells(cellMap, canvas):
-	for row in cellMap:
-		for cell in row:
-			cell.draw(canvas)
 
-def runSim(mapWidth=1920, mapHeight=1080, cellWidth=10, cellHeight=10):
-	root = tk.Tk()
-	root.wm_title = ("Game of Life")
+def isValidCell(x, y, mapWidth, mapHeight):
+    """ returns true if x, y, is on the map, otherwise false """
+    return 0 <= x < mapWidth and 0 <= y < mapHeight
 
-	canvas = tk.Canvas(root, width = mapWidth, height = mapHeight) 
-	canvas.grid(row=0, column=0)
 
-	cellMap = startMap(mapWidth, mapHeight, cellWidth, cellHeight)
-	
-	while True:
-		canvas.delete("all")
-		step(cellMap)
-		drawCells(cellMap, canvas)
-		canvas.update()
-	
-	mainloop()
-	root.destroy()
+def stepCell(x, y, mapWidth, mapHeight, cellMap):
+    """ updates the cell at x, y according to the life values of its neighbours """
+    neighbourCount = -cellMap[y][x]
+    for i in range(-1, 1):
+        for j in range(-1, 1):
+            if isValidCell(x + i, y + j, mapWidth, mapHeight):
+                neighbourCount += cellMap[y + j][x + i]
+
+    cellMap[y][x] = 0 if neighbourCount < 3 or neighbourCount > 4 else 1
+
+
+def step(cellMap, mapWidth, mapHeight):
+    """ updates each cell in the map according to the life values of their neighbours """
+    for y in range(mapHeight):
+        for x in range(mapHeight):
+            stepCell(x, y, mapWidth, mapHeight, cellMap)
+
+
+def drawCells(mapWidth, mapHeight, cellWidth, cellHeight, cellMap, canvas):
+    for y in range(mapHeight):
+        for x in range(mapWidth):
+            if cellMap[y][x] == 1:
+                canvas.create_rectangle(x, y, x + cellWidth, y + cellHeight, fill='black')
+            else:
+                canvas.create_rectangle(x, y, x + cellWidth, y + cellHeight, fill='white')
+
+
+def runSim(mapWidth=800, mapHeight=800, cellWidth=50, cellHeight=50):
+    print("initializing tkinter...")
+    root = tk.Tk()
+    root.wm_title = ("Game of Life")
+
+    print("generating canvas...")
+    canvas = tk.Canvas(root, width = mapWidth, height = mapHeight)
+    canvas.grid(row=0, column=0)
+
+    print("generating seed...")
+
+    cellMap = seed(mapWidth, mapHeight, cellWidth, cellHeight)
+
+    print("starting simulation...")
+    while True:
+        print("deleting")
+        canvas.delete("all")
+        print("stepping")
+        step(cellMap, mapWidth, mapHeight)
+        print("drawing")
+        drawCells(mapWidth, mapHeight, cellWidth, cellHeight, cellMap, canvas)
+        print("updating")
+        canvas.update()
+
+    mainloop()
+    root.destroy()
+
 
 if __name__ == '__main__':
-	runSim()
+    runSim()
